@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مساعد منسق جهينة الذكي</title>
+    <style>
+        :root {
+            --primary-color: #008751; /* أخضر جهينة */
+            --secondary-color: #0056b3;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --success-color: #28a745;
+            --light-bg: #f8f9fa;
+            --dark-text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f5;
+            margin: 0;
+            padding: 0;
+            color: var(--dark-text);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+            bottom: 60px;
+            position: relative;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:active {
+            background-color: #00643c;
+        }
+
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-danger:active { background-color: #b21f2d; }
+
+        .notification {
+            background-color: #fff3cd;
+            border-right: 5px solid var(--warning-color);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .notification.critical {
+            background-color: #f8d7da;
+            border-right: 5px solid var(--danger-color);
+            color: #721c24;
+        }
+
+        .product-item {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .flex-space {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .badge-danger { background-color: var(--danger-color); }
+        .badge-warning { background-color: var(--warning-color); color: #000; }
+        .badge-success { background-color: var(--success-color); }
+
+        /* القائمة السفلية للتنقل (تسهيل الشغل عالموبايل) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 0.85rem;
+            color: #666;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            border-top: 3px solid var(--primary-color);
+            background-color: #f9f9f9;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .suggestion-box {
+            background-color: #e2f0d9;
+            border-right: 5px solid var(--success-color);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>🛒 مساعد رفوف جهينة الذكي</header>
+
+    <div class="container">
+        
+        <div id="dashboard-page" class="page active">
+            <div class="card">
+                <h2>⚠️ إنذارات الصلاحية والنواقص اليومية</h2>
+                <div id="alerts-container">
+                    <p style="text-align: center; color: #666;">كل التواريخ آمنة والرفوف تمام اليوم! 👍</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📊 ملخص الرصيد الحالي بالفرع</h2>
+                <div id="inventory-summary">
+                    </div>
+            </div>
+        </div>
+
+        <div id="add-page" class="page">
+            <div class="card">
+                <h2>📦 تسجيل رصيد / شحنة جديدة بالصلاحية</h2>
+                <form id="product-form">
+                    <div class="form-group">
+                        <label>اسم المنتج</label>
+                        <select id="prod-name" required>
+                            <option value="حليب جهينة كامل الدسم 1 لتر">حليب جهينة كامل الدسم 1 لتر</option>
+                            <option value="حليب جهينة بخيره 1 لتر">حليب جهينة بخيره 1 لتر</option>
+                            <option value="زبادي جهينة طبيعي 105 جرام">زبادي جهينة طبيعي 105 جرام</option>
+                            <option value="زبادي لايت 105 جرام">زبادي لايت 105 جرام</option>
+                            <option value="رايب جهينة طبيعي 440 مللي">رايب جهينة طبيعي 440 مللي</option>
+                            <option value="عصير جهينة بيور مانجو 1 لتر">عصير جهينة بيور مانجو 1 لتر</option>
+                            <option value="عصير جهينة تفاح 1 لتر">عصير جهينة تفاح 1 لتر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ انتهاء الصلاحية</label>
+                        <input type="date" id="prod-expiry" required>
+                    </div>
+                    <div class="form-group">
+                        <label>الكمية الحالية على الرف والمخزن (قطعة)</label>
+                        <input type="number" id="prod-qty" min="0" placeholder="دخل عدد القطع" required>
+                    </div>
+                    <button type="submit">تعديل / إضافة الرصيد الحالي</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="sales-page" class="page">
+            <div class="card">
+                <h2>📉 تسجيل جرد الرف اليومي (حساب السحب تلقائياً)</h2>
+                <p style="font-size: 0.8rem; color:#666;">اكتب الكمية المتبقية حالياً على الرف، والسيستم هيحسب لوحده كام قطعة اتباعت ومن أنهي تاريخ بناءً على قاعدة (القديم بيتباع الأول).</p>
+                <div id="sales-entries">
+                    </div>
+            </div>
+        </div>
+
+        <div id="order-page" class="page">
+            <div class="card">
+                <h2>💡 مقترح الأوردر الذكي (منع المرتجعات)</h2>
+                <p style="font-size: 0.8rem; color:#666;">بناءً على متوسط سحب الفرع اليومي، دي الأعداد المقترحة للأوردر الجاي عشان الرف ميفضاش وفي نفس الوقت متعملش مرتجع منتهي الصلاحية:</p>
+                <div id="orders-container">
+                    </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchPage('dashboard-page', this)">🏠 الرئيسة</div>
+        <div class="nav-item" onclick="switchPage('add-page', this)">➕ رصيد وصلاحية</div>
+        <div class="nav-item" onclick="switchPage('sales-page', this)">📉 سحب يومي</div>
+        <div class="nav-item" onclick="switchPage('order-page', this)">🧠 أوردر ذكي</div>
+    </div>
+
+    <script>
+        // قاعدة البيانات المحلية في المتصفح
+        let db = JSON.parse(localStorage.getItem('juhayna_db')) || [];
+
+        // تحويل الصفحات
+        function switchPage(pageId, navElement) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            navElement.classList.add('active');
+
+            // تحديث البيانات بناءً على الصفحة المفتوحة
+            if(pageId === 'dashboard-page') renderDashboard();
+            if(pageId === 'sales-page') renderSalesPage();
+            if(pageId === 'order-page') renderOrderPage();
+        }
+
+        // حفظ البيانات
+        function saveDB() {
+            localStorage.setItem('juhayna_db', JSON.stringify(db));
+        }
+
+        // إضافة أو تحديث منتج بتاريخ صلاحيته
+        document.getElementById('product-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('prod-name').value;
+            const expiry = document.getElementById('prod-expiry').value;
+            const qty = parseInt(document.getElementById('prod-qty').value);
+
+            // البحث لو المنتج بنفس التاريخ مسجل قبل كده نعمله تحديث
+            const existingIndex = db.findIndex(p => p.name === name && p.expiry === expiry);
+
+            if(existingIndex > -1) {
+                db[existingIndex].qty = qty;
+            } else {
+                db.push({
+                    name,
+                    expiry,
+                    qty,
+                    dailySales: [] // لتسجيل كميات السحب اليومي وحساب المتوسط لعمل الأوردرات
+                });
+            }
+
+            saveDB();
+            alert('تم حفظ البيانات بنجاح لمنتج: ' + name);
+            document.getElementById('product-form').reset();
+            switchPage('dashboard-page', document.querySelectorAll('.nav-item')[0]);
+        });
+
+        // رندر لوحة التحكم والتنبيهات
+        function renderDashboard() {
+            const alertsCont = document.getElementById('alerts-container');
+            const summaryCont = document.getElementById('inventory-summary');
+            alertsCont.innerHTML = '';
+            summaryCont.innerHTML = '';
+
+            if(db.length === 0) {
+                alertsCont.innerHTML = '<p style="text-align: center; color: #666;">لم تسجل أي بضاعة بعد. روح لصفحة "رصيد وصلاحية" وابدأ فوراً!</p>';
+                return;
+            }
+
+            const today = new Date();
+            let alertHtml = '';
+            let summaryHtml = '';
+
+            // ترتيب المنتجات حسب الأقرب انتهاءً
+            db.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+
+            db.forEach((item, index) => {
+                const expiryDate = new Date(item.expiry);
+                const diffTime = expiryDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                let badgeClass = 'badge-success';
+                let statusText = 'آمن';
+                
+                // تحديد خطورة التاريخ بناءً على نوع المنتج (ألبان وزبادي بيموتوا بسرعة مقارنة بالعصير)
+                let isShortLife = item.name.includes('زبادي') || item.name.includes('رايب');
+                let dangerLimit = isShortLife ? 4 : 15;
+                let warningLimit = isShortLife ? 7 : 30;
+
+                if (diffDays <= 0) {
+                    badgeClass = 'badge-danger';
+                    statusText = 'منتهي الصلاحية ❌';
+                    alertHtml += `<div class="notification critical">🚨 <b>${item.name}</b> (تاريخ: ${item.expiry}) انتهى تماماً! اسحبه فوراً من الرف.</div>`;
+                } else if (diffDays <= dangerLimit) {
+                    badgeClass = 'badge-danger';
+                    statusText = `حرج جداً (${diffDays} يوم)`;
+                    alertHtml += `<div class="notification critical">⚠️ <b>${item.name}</b> ينتهي خلال ${diffDays} أيام! (الكمية: ${item.qty} قطعة). حركه في وش الرف!</div>`;
+                } else if (diffDays <= warningLimit) {
+                    badgeClass = 'badge-warning';
+                    statusText = `قرب ينتهي (${diffDays} يوم)`;
+                    alertHtml += `<div class="notification">🔔 <b>${item.name}</b> متبقي له ${diffDays} يوم. تابع سحبه اليومي.</div>`;
+                }
+
+                summaryHtml += `
+                    <div class="product-item flex-space">
+                        <div>
+                            <b>${item.name}</b> <br>
+                            <small style="color:#666;">تاريخ الانتهاء: ${item.expiry} | الرصيد: <b>${item.qty}</b> ق</small>
+                        </div>
+                        <span class="badge ${badgeClass}">${statusText}</span>
+                    </div>
+                `;
+            });
+
+            if(alertHtml === '') {
+                alertsCont.innerHTML = '<p style="text-align: center; color: var(--success-color);"><b>كل التواريخ في السليم ومفيش حاجة قريبة الانتهاء اليوم! عاش يا بطل.</b></p>';
+            } else {
+                alertsCont.innerHTML = alertHtml;
+            }
+
+            summaryCont.innerHTML = summaryHtml;
+        }
+
+        // رندر صفحة السحب اليومي للجرد
+        function renderSalesPage() {
+            const container = document.getElementById('sales-entries');
+            container.innerHTML = '';
+
+            if(db.length === 0) {
+                container.innerHTML = '<p style="text-align: center;">سجل بضاعة أولاً ليظهر جرد السحب اليومي.</p>';
+                return;
+            }
+
+            db.forEach((item, index) => {
+                container.innerHTML += `
+                    <div class="product-item" style="background: #fafafa; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                        <div class="flex-space" style="margin-bottom: 8px;">
+                            <div>
+                                <b>${item.name}</b> <br>
+                                <small style="color: #666;">الصلاحية: ${item.expiry} | الرصيد المسجل: <b>${item.qty}</b> ق</small>
+                            </div>
+                        </div>
+                        <div class="flex-space">
+                            <label style="font-size:0.85rem; width: 60%;">كم قطعة متبقية على الرف حالياً؟</label>
+                            <input type="number" id="jard-${index}" min="0" max="${item.qty}" placeholder="اكتب الجرد الجديد" style="width: 35%; padding: 6px;">
+                        </div>
+                        <button onclick="calculateDailyPull(${index})" style="padding: 6px; font-size: 0.85rem; margin-top: 8px; background-color: var(--secondary-color);">تحديث وحساب كمية السحب</button>
+                    </div>
+                `;
+            });
+        }
+
+        // حساب كمية السحب الفعلي لليوم
+        function calculateDailyPull(index) {
+            const inputField = document.getElementById(`jard-${index}`);
+            const currentJard = parseInt(inputField.value);
+
+            if (isNaN(currentJard)) {
+                alert('من فضلك اكتب رقم الجرد الفعلي على الرف عشان نحسب السحب.');
+                return;
+            }
+
+            const item = db[index];
+            const pulledQty = item.qty - currentJard; // كم قطعه نقصت من التاريخ ده
+
+            if(pulledQty < 0) {
+                alert('رقم الجرد أكبر من الرصيد المسجل! لو نزلت بضاعة جديدة، ضيفها الأول من صفحة (رصيد وصلاحية).');
+                return;
+            }
+
+            // تسجيل السحب في مصفوفة السحب اليومي للمنتج
+            item.dailySales.push(pulledQty);
+            // تحديث رصيد المنتج الفعلي في السيستم ليصبح هو الجرد الحالي
+            item.qty = currentJard;
+
+            saveDB();
+            alert(`تمام! السيستم سجل إن فيه [ ${pulledQty} قطعة ] نقصت واتباعت من تاريخ انتهاء ${item.expiry}. والرصيد اتحدث لـ ${currentJard} قطعة.`);
+            renderSalesPage();
+        }
+
+        // رندر صفحة الأوردرات الذكية لمنع المرتجع بالتحليل المالي والبياني للفرع
+        function renderOrderPage() {
+            const container = document.getElementById('orders-container');
+            container.innerHTML = '';
+
+            // تجميع السحب حسب اسم المنتج الكلي (بغض النظر عن اختلاف التواريخ)
+            let productAnalysis = {};
+
+            db.forEach(item => {
+                if(!productAnalysis[item.name]) {
+                    productAnalysis[item.name] = {
+                        totalStock: 0,
+                        salesHistory: [],
+                        expiries: []
+                    };
+                }
+                productAnalysis[item.name].totalStock += item.qty;
+                productAnalysis[item.name].salesHistory.push(...item.dailySales);
+                productAnalysis[item.name].expiries.push(item.expiry);
+            });
+
+            if(Object.keys(productAnalysis).length === 0) {
+                container.innerHTML = '<p style="text-align: center;">لا توجد بيانات كافية لتحليل الفرع وعمل أوردرات ذكية حالياً.</p>';
+                return;
+            }
+
+            for(let prodName in productAnalysis) {
+                let prod = productAnalysis[prodName];
+                
+                // حساب متوسط السحب اليومي (لو مفيش سحب متسجل بنفترض سحب افتراضي آمن زي قطعة واحدة)
+                let avgSales = 0;
+                if(prod.salesHistory.length > 0) {
+                    let sum = prod.salesHistory.reduce((a, b) => a + b, 0);
+                    avgSales = sum / prod.salesHistory.length;
+                } else {
+                    avgSales = 2; // رقم افتراضي استرشادي لحد ما يبدأ يسجل جرد يومي
+                }
+
+                // معادلة الأوردر الذكي الآمن لمدة 3 أيام قادمة مثلاً عشان تمنع التكديس والمرتجع
+                let daysToCover = 3; 
+                let safetyStock = Math.ceil(avgSales * 0.5); // 50% أمان زيادة
+                let targetOrder = Math.ceil((avgSales * daysToCover) + safetyStock - prod.totalStock);
+                
+                if(targetOrder < 0) targetOrder = 0; // مش محتاجين نطلب لو المخزون مغطي
+
+                let adviceMessage = "";
+                if(targetOrder === 0) {
+                    adviceMessage = "⚠️ السحب بطيء والمخزون الحالي كافي جداً. لا تطلب أي قطعة جديدة عشان متعملش مرتجع منتهي!";
+                } else {
+                    adviceMessage = `✅ اطلب حوالي <b>${targetOrder} قطعة</b> فقط. دي الكمية المناسبة لسحب الفرع لـ 3 أيام جايين بدون تكديس وبأمان تّام.`;
+                }
+
+                container.innerHTML += `
+                    <div class="product-item" style="border-left: 4px solid var(--primary-color); padding-right: 8px; margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 1rem; color: #111;">${prodName}</h3>
+                        <div style="font-size: 0.85rem; color: #555;">
+                            • إجمالي رصيدك بالفرع حالياً: <b>${prod.totalStock}</b> قطعة <br>
+                            • معدل السحب اليومي المحلل للفرع: <b>${avgSales.toFixed(1)}</b> قطعة/يوم
+                        </div>
+                        <div class="suggestion-box">
+                            ${adviceMessage}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // تشغيل الرندر الأولي عند فتح التطبيق لأول مرة
+        renderDashboard();
+    </script>
+</body>
+</html>
